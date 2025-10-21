@@ -8,10 +8,10 @@ const usernameInput = document.getElementById("username-input");
 const joinBtn = document.getElementById("join-btn");
 
 let username = "";
-let lastSender = null; // last message sender
-let lastMessageElement = null; // last message bubble element
+let lastSender = null;
+let lastMessageElement = null;
 
-// Login process
+// Handle login
 joinBtn.addEventListener("click", () => {
   const name = usernameInput.value.trim();
   if (!name) {
@@ -22,6 +22,7 @@ joinBtn.addEventListener("click", () => {
   socket.emit("new user", username);
   loginScreen.classList.add("hidden");
   chatContainer.classList.remove("hidden");
+  input.focus();
 });
 
 // Send message
@@ -33,7 +34,7 @@ form.addEventListener("submit", (e) => {
   const msgData = {
     user: username,
     text: msg,
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   };
 
   addMessage(msgData, true);
@@ -48,7 +49,7 @@ socket.on("chat message", (data) => {
   }
 });
 
-// Notify join
+// User joins
 socket.on("user joined", (user) => {
   const notice = document.createElement("li");
   notice.classList.add("notice");
@@ -58,7 +59,7 @@ socket.on("user joined", (user) => {
   lastSender = null;
 });
 
-// Notify leave
+// User leaves
 socket.on("user left", (user) => {
   const notice = document.createElement("li");
   notice.classList.add("notice");
@@ -69,7 +70,7 @@ socket.on("user left", (user) => {
 });
 
 function addMessage(data, self) {
-  // if same user continues, remove timestamp from previous bubble
+  // Remove previous timestamp if same user continues
   if (lastSender === data.user && lastMessageElement) {
     const oldTime = lastMessageElement.querySelector(".timestamp");
     if (oldTime) oldTime.remove();
@@ -78,7 +79,7 @@ function addMessage(data, self) {
   const li = document.createElement("li");
   li.classList.add("message-container", self ? "self" : "other");
 
-  // Only show name if sender changed
+  // Only show username if new sender
   const showName = data.user !== lastSender;
   if (showName) {
     const nameTag = document.createElement("div");
@@ -102,5 +103,5 @@ function addMessage(data, self) {
   messages.scrollTop = messages.scrollHeight;
 
   lastSender = data.user;
-  lastMessageElement = li; // save current as last
+  lastMessageElement = li;
 }
